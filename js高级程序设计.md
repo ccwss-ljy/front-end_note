@@ -333,3 +333,331 @@ console.log(typeof age); //undefined
    - parseFloat()
 
      和parseInt基本一样，但是只认识十进制，而且没有第二个参数。如果字符串为整数返回整数。
+
+### 3.4.6 String类型(记得回来看标签函数)
+
+1. 字符字面量（p38）
+
+2. 字符串的特点
+
+   - 字符串定义后就是不可变的，如果修改只可以销毁原字符串然后重新保存新值。
+
+3. 转换为字符串
+
+   有两种方法：
+
+   - toString
+
+     可以将除了null、undefined的数据类型转为字符串等价物
+
+     ```js
+     true.toString(); //"true"
+     10.toString(); //"10"
+     10.toString(16); //"a"
+     "ha".toString(); //"ha" 创建一个该字符串的副本
+     {a:1}.toString(); //"[object Object]"
+     [1,2,3].toString(); //"1,2,3"
+     ```
+
+   - String()
+
+     可以将null、undefined转为“null”、“undefined”。其余数据类型和toString()一样。
+
+4. 模板字面量
+
+   使用\``符号使用模板字面量，会保留``内的所有字符格式，包括空格。所以在使用时要注意。
+
+5. 字符串插值
+
+   模板字面量从技术上讲属于js的表达式，而不是字符串，只是最后会返回一个字符串。
+
+   使用${}来进行插值，${}里面的内容会使用String()转为字符串。
+
+6. 模板字面量标签函数（p42看不懂之后看）
+
+7. 原始字符串
+
+   使用String.raw，可以通过模板字面量获取到转移前的字符串。
+
+   ```js
+   console.log(`first line\nsecound line`) //first line
+   										//secound line
+   console.log(String.raw`first line\nsecound line`) //first line\nsecound line
+   -----------------------------
+   console.log(`\u00A9`) //©
+   console.log(String.raw`\u00A9`) //\u00A9
+   ```
+
+### 3.4.7 Symbol类型(后面的属性放一放，之后看)
+
+​	概念：Symbol（符号）是唯一的，不可变的。主要的用途是确保对象属性的唯一性，不会发生对象属性冲突的危险。
+
+1. 符号的基本用法
+
+   个人理解：符号就像每个人，每个人都是不同的。初始化里的字符串就像每个人的名字，名字可能相同，但是相同名字对应的人是不同的。
+
+   ```js
+   let s1 = Symbol(); //初始化
+   let s2 = Symbol("foo"); //初始化，传入foo来描述这个符号，相当于给符号起了个名字
+   let s3 = Symbol("foo");
+   console.log(s2 === s3); //false
+   ```
+
+   符号不可以使用new关键字，来创建符号包装对象。如果是在想让对象包装符号，可以使用Object()
+
+2. 使用全局符号注册表
+
+   - Symbol.for()
+
+   如果不同部分想共享和重用同一个符号，就可以在全局注册表中注册一个Symbol。使用Symbol.for()方法。该方法是幂等方法，同一个字符串注册在全局注册表的符号是相等的。第一个使用Symbol.for()时，看全局注册表上有没有，如果没有进行注册，如果有直接返回。
+
+   ```js
+   let s1 = Symbol.for("foo");
+   let s2 = Symbol.for("foo");
+   console.log(s1 === s2); //true
+   ```
+
+   在全局注册表上注册的符号和用Symbol()定义的符号是不等的。可以这样理解，如果相等的话，说明用Symbol()定义的符号也是注册在全局注册表的，这显然是不对的。所以它两必然不等。
+
+   ```js
+   let s = Symbol("foo");
+   let s1 = Symbol.for("foo");
+   console.log(s === s1) //false
+   ```
+
+   用Symbol.for()传的值默认都会通过String()转为字符串，如果传空，默认符号为Symbol(undefined)
+
+   ```js
+   let s1 = Symbol.for();
+   let s2 = Symbol.for(undefined);
+   console.log(s1 === s2); //true,因为undefined转为字符串为“undefined”，传空值也转为“undefined”。所以相等
+   ```
+
+   - Symbol.keyFor()
+
+     使用Symbol.keyFor()，可以查全局注册表上符号的描述，不是全局注册表上的符号返回undefined。参数如果不为符号，则报错。
+
+     ```js
+     let s1 = Symbol.for("foo");
+     let s2 = Symbol('foo');
+     console.log(Symbol.keyFor(s1)); //foo
+     console.log(Symbol.keyFor(s2)); //undefined
+     ```
+
+3. 使用符号作为属性
+
+   - 以下几种方式都可以在对象中定义符号属性
+
+   ```js
+   let s1 = Symbol('foo');
+   let s2 = Symbol('bar');
+   let s3 = Symbol('baz');
+   let s4 = Symbol('qux');
+   let o = {
+       [s1]:'foo value' //第一种方法
+   }
+   o[s2] = 'bar value'; //第二种方法
+   Object.defineProperty(o, s3, {value:"baz value"}) //第三种方法
+   Object.defineProperties(o, {
+       [s3]:{value:"baz value"},
+       [s4]:{value:"qux value"}
+   }) //第四种方法
+   ```
+
+   - 获取对象属性的几种方法
+
+   ```js
+   let s1 = Symbol("foo"),
+       s2 = Symbol("bar");
+   let o = {
+       [s1]: 'foo value',
+       [s2]: 'bar value',
+       baz: 'baz value',
+       qux: 'qux value'
+   }
+   console.log(Object.getOwnPropertyNames(o)); //['baz','qux'] 返回常规属性的数组
+   console.log(Object.getOwnPropertySymbols(o)); //[Symbol('foo'),Symbol('bar')] 返回符号属性的数组
+   console.log(Object.getOwnPropertyDescriptors(o)); //返回所有属性的属性描述符对象
+   console.log(Reflect.ownKeys(o)); //['baz','qux',Symbol('foo'),Symbol('bar')] 返回所有属性的数组
+   ```
+
+   - 符号定义以后就会存在，所以也可以直接用做对象的属性，但是如果没有显示地存这个符号的话，获取这个属性将会很困难
+
+   ```js
+   let s1 = Symbol("foo");
+   let o = {
+       [s1]: 'foo value',
+       [Symbol("bar")]: 'bar value',
+       baz: 'baz value',
+       qux: 'qux value'
+   } //o的第二个属性就是直接将符号作为了属性，而第一个属性是将符号显式存储到s1，然后将s1作为属性。
+   console.log(o[s1]) //'foo value'
+   console.log(o[Symbol("bar")]); //'undefined'，因为符号是唯一的，所以这样操作是有问题的，所以需要通过Object.getOwnPropertySymbols这个api往出取，所以比较复杂
+   ```
+
+4. 常用内置符号
+5. Symbol.asyncIterator
+
+### 3.4.8 Object类型
+
+- constructor：用于创建对象的函数，比如实例对象、原型对象的constructor都是这个构造函数。
+- hasOwnProperty(propertyName)：判断当前对象实例上有没有该属性
+- isPrototypeOf(Object)：用于判断当前对象是不是另一个对象的原型
+- propertyIsEnumerable(propertyName)：用于判断给定的属性是否可以使用for-in遍历
+- toLocaleString()：返回对象的字符串表示，该字符串反映对象所在的本地化执行环境
+- toString()：返回对象的字符串表示
+- valueOf()：返回对象对应的字符串、数值或布尔值表示。
+
+## 3.5 操作符
+
+### 3.5.1 一元操作符
+
+1. 递增/递减操作符
+
+   给其他数据类型使用该操作符，其他数据类型会先使用Number()转为数字类型，再进行操作。
+
+2. 一元加和减
+
+   一元加放到数据类型前面默认使用Number()方法，一元减放到数据类型前面默认使用Number()方法，将可以变为数字的数据类型变为负数。
+
+### 3.5.2 位操作符
+
+​	js的数字，整数是用原码存，负数是用补码存。如果能用位运算实现的计算，最好用位运算，因为位运算是在底层实现的，速度要快。
+
+1. 按位非（~）
+
+   ```js
+   let num1 = 25; //0...11001
+   let num2 = ~num1; //1...00110
+   console.log(num2); //-26。因为num2是负数，当它输出时，需要将当前值取补码输出，所以最终结果是-26。
+   ```
+
+2. 按位与（&）
+
+3. 按位或（|）
+
+4. 按位异或（^）
+
+5. 左移（<<）
+
+6. 有符号右移（>>）
+
+   右移后的空位，由符号位的值来填充。
+
+7. 无符号右移（>>>）
+
+   不管符号位，整个向右移，正负数左边的空位都补充0
+
+### 3.5.3 布尔操作符
+
+1. 逻辑非（!）
+
+   使用!，首先会把其他数据类型的值转为布尔类型（转换规则符合Boolean()）然后取反。
+
+   如果使用!!，把其他数据类型转为布尔类型，相当于使用了Boolean()。
+
+2. 逻辑与（&&）
+
+   不光返回布尔值，如果操作数中有不是布尔值，有可能返回其他数据类型，遵循短路原则。
+
+   - 第一个操作数转为布尔类型为true，会返回第二个操作数的结果
+   - 第一个操作数转为布尔类型为false，返回第一个操作数
+
+3. 逻辑或（||）
+
+   不光返回布尔值，如果操作数中有不是布尔值，有可能返回其他数据类型，遵循短路原则。
+
+   - 第一个操作数转为布尔类型为true，返回第一个操作数的结果
+   - 第一个操作数转为布尔类型为false，返回第二个操作数的结果
+
+### 3.5.4 乘性操作符
+
+1. 乘法操作符（*）
+   - NaN和任何数相乘都是NaN
+   - Infinity*0结果是NaN
+   - 如果有操作数不为数值类型，那使用Number()转为数值类型，然后计算
+2. 除法操作符（/）
+   - NaN和任何数相除都是NaN
+   - Infinity/infinity结果为NaN
+   - 有限值除以Infinity结果为0，符号由两个操作数来决定
+   - 非0除以0，结果为Infinity，符号由两个操作数来决定
+   - 如果有操作数不为数值类型，那使用Number()转为数值类型，然后计算
+3. 取模操作符（%）（p67）
+
+### 3.5.5 指数操作符
+
+​	** 和Math.pow()都可以
+
+### 3.5.6 加性操作符
+
+1. 加法操作符
+
+   遇到字符串，会把其他数据类型转为字符串类型
+
+2. 减法操作符
+
+   遇到其他数据类型，都会把其他数据类型转为Number数据类型来进行计算
+
+### 3.5.7 关系操作符
+
+- 如果都为字符串会根据编码顺序来进行大小比较
+- 如果一个操作数为其他数据类型，就会先转为数值类型或字符串类型进行比较
+- NaN不管怎么比较都是false
+
+### 3.5.8 相等操作符
+
+​	（==和!=）在进行比较时，需要先进行数据类型转换。（===和!==）在进行比较时，不进行数据类型的转换
+
+### 3.5.9 条件操作符（三目操作符）
+
+### 3.5.10 赋值操作符
+
+### 3.5.11 逗号操作符
+
+```js
+let num = 1, num = 2, num = 3;
+let num = (5, 1, 4, 6, 0); //最终num的值为0，这种用法很少见
+```
+
+## 3.6 语句
+
+### 3.6.1 if语句
+
+### 3.6.2 do-while语句
+
+### 3.6.3 while语句
+
+### 3.6.4 for语句
+
+### 3.6.5 for-in语句
+
+​	for-in是一个严格的迭代语句，枚举对象中所有的非符号键属性
+
+### 3.6.6 for-of语句（看完第七章再回来理解）
+
+​	for-of会根据可迭代对象的next()方法产生值的迭代顺序来进行迭代
+
+### 3.6.7 标签语句
+
+​	用于给语句加标签
+
+```js
+start:for(let i = 0;i < count;i++){
+    console.log(i)
+} //这个start会在break或是continue上有用，用于嵌套循环
+```
+
+### 3.6.8 break和continue语句
+
+​	break和continue只能跳出一层循环。但是加上标签的话，可以跳出标签层。
+
+### 3.6.9 with语句（p78，了解，基本用不到）
+
+### 3.6.10 switch语句
+
+​	switch语句中的每个条件的值的比较使用的是全等，所以不会进行数据类型转换。
+
+## 3.7 函数
+
+# 四、变量、作用域与内存
+
