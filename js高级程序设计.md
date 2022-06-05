@@ -786,7 +786,183 @@ b.name = a;
 
 # 五、基本引用类型
 
+​	概念：函数是引用类型的一种，对象是引用类型的实例（可以把引用类型类比成“类”，但是它两不完全一样）
 
+## 5.1 Date
 
+```js
+let now = new Date(); //返回当前日期和时间
+//如果想知道其他时间和日期，就将其他时间的毫秒数传入。也可以直接传入时间字符串，默认调用Date.parse()方法
+//返回的时间都是电脑设置的时间
+let time = Date.parse(); //传入日期字符串，返回相应的毫秒数，如果不是日期字符串返回NaN
+let time = Date.UTC(); //该方法是传入年、月、日的数字来返回对应的毫秒数。不过月份是从0开始
+let start = Date.now(); //执行该方法时的时间。一般在一段程序前后分别使用，然后作差来记录程序运行时间
+```
 
+### 5.1.1 继承的方法
+
+```js
+Date重写了toString、toLocalString、valueOf方法。
+toString、toLocalString返回时间字符串
+valueOf返回毫秒数
+```
+
+### 5.1.2 日期格式化方法（p106）
+
+### 5.1.3 日期/时间组件方法（p106）
+
+## 5.2  RegExp
+
+标记
+
+- g：全局模式，找到所有符合的
+- i：不区分大小写
+- m：多行模式，表示查找到最后一行会接着查找
+- y：粘附模式，表示只查找从lastIndex开始及以后的字符串
+- u：Unicode模式，启用Unicode匹配
+- s：dotAll模式，表示元字符.可以匹配所有包括\n、\t
+
+正则表达式的创建有两种方式
+
+```js
+let reg1 = /at/i;
+let reg2 = new RegExp('at', 'i')
+```
+
+### 5.2.1 RegExp实例属性
+
+- global：判断是否开启g
+- ignoreCase：判断是否开启i
+- unicode：判断是否开启u
+- sticky：判断是否开启y
+- lastIndex：表示在源字符串下一次开启搜索的位置，始终从0开始
+- multline：表示是否开启m
+- dotAll：表示是否开启s
+- source：正则表达式的字面量字符串
+- flags：正则表达式的标记字符串
+
+### 5.2.2 RegExp实例方法
+
+- exec：返回一个数组，这个数组会有两个新增属性。input是返回要匹配的字符串，index是返回匹配时的开始位置。数组的第一个元素是匹配的内容，如果有捕获组，之后的元素就是捕获组里的内容。
+  - 不使用全局永远只匹配第一个符合的，使用全局可以匹配后面的
+
+```js
+let text = '1mom and dad and baby';
+let reg = /mom( and dad( and baby)?)?/gi;
+let matches = reg.exec(text);
+console.log(matches.index); //1
+console.log(matches.input); //1mom and dad and baby
+console.log(matches[0]) //mom and dad and baby
+console.log(matches[1]) // and dad and baby
+console.log(matches[2]) // and baby
+```
+
+不使用全局
+
+```js
+let text = 'cat bat sat fat';
+let reg = /.at/;
+let matches = reg.exec(text);
+console.log(matches[0]) //cat
+console.log(matches.index) //0
+console.log(reg.lastIndex) //0
+
+matches = reg.exec(text);
+console.log(matches[0]) //cat
+console.log(matches.index) //0
+console.log(reg.lastIndex) //0
+```
+
+使用全局
+
+```js
+let text = 'cat bat sat fat';
+let reg = /.at/g;
+let matches = reg.exec(text);
+console.log(matches[0]) //cat
+console.log(matches.index) //0
+console.log(reg.lastIndex) //3，因为匹配从0-2，所以下次开始匹配的位置是从3开始
+
+matches = reg.exec(text);
+console.log(matches[0]) //cat
+console.log(matches.index) //4
+console.log(reg.lastIndex) //7
+```
+
+如果开启粘附模式
+
+```js
+let text = 'cat bat sat fat';
+let reg = /.at/y;
+let matches = reg.exec(text);
+console.log(matches[0]) //cat
+console.log(matches.index) //0
+console.log(reg.lastIndex) //3，因为匹配从0-2，所以下次开始匹配的位置是从3开始
+
+matches = reg.exec(text);
+console.log(matches) //null，因为开启粘附，下次从3开始，而且从3开始必须匹配，因为3是空格所以不匹配返回null
+console.log(reg.lastIndex) //0
+
+reg.lastIndex = 4; //因为开启了粘附，所以可以提前设置lastIndex位置，使其匹配
+matches = reg.exec(text);
+console.log(matches[0]) //bat
+console.log(matches.index) //4
+console.log(reg.lastIndex) //7
+```
+
+- test：test来检验是否匹配字符串，返回布尔值
+
+```js
+let text = '000-00-0000';
+let reg = /\d{3}-\d{2}-\d{4}/
+if(reg.test(text)){
+    console.log("匹配")
+}
+```
+
+### 5.2.3 RegExp构造函数属性
+
+- input：最后搜索的字符串
+- lastMatch：最后匹配的文本
+- lastParen：最后匹配的捕获组
+- leftContext：input字符串中出现在lastMatch左边的内容
+- rightContext：input字符串中出现在lastMatch右边的内容
+- $1-$9：捕获组中按顺序对应的值
+
+RegExp的构造函数属性，当执行完exec或test时，就会填充这些属性
+
+```js
+let text = 'this has been a short summer';
+
+let reg = /(.)hort/g;
+
+if(reg.test(text)){
+    console.log(RegExp.input); //this has been a short summer
+    console.log(RegExp.lastMatch); //short
+    console.log(RegExp.leftContext); //this has been a 
+    console.log(RegExp.rightContext); // summer
+    console.log(RegExp.lastParen); //s
+    console.log(RegExp.$1) //s
+}
+```
+
+```js
+let text = 'this has been a short summer';
+
+let reg = /(.)hort/g;
+
+let text1 = 'this has been a long summer';
+
+let reg1 = /(.)ong/g;
+
+reg.test(text)
+reg1.test(text1)
+console.log(RegExp.input); //this has been a long summer
+console.log(RegExp.lastMatch); //long
+console.log(RegExp.leftContext); //this has been a 
+console.log(RegExp.rightContext); // summer
+console.log(RegExp.lastParen); //l
+console.log(RegExp.$1) //l
+//因为最后匹配的是text1这个字符串，所以RegExp构造函数属性就被替换了
+```
 
