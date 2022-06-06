@@ -966,3 +966,215 @@ console.log(RegExp.$1) //l
 //因为最后匹配的是text1这个字符串，所以RegExp构造函数属性就被替换了
 ```
 
+## 5.3 原始值包装类型
+
+原始值包装类型有三个分别为Boolean、String、Number，使用Object也可以实现原始值包装类型，和传入的参数有关，比如传入字符串，那么和使用String构造的实例就一样了
+
+```js
+let b = new Boolean(true);
+let s = new String("heihei");
+let n = new Number(1);
+let obj = new Object("heihei"); //obj结果为String{"heihei"}
+```
+
+### 5.3.1 Boolean
+
+重写了valueOf，返回true、false，重写了toString，返回“true”、“false”。但是最好不要用该原始值包装类型，因为对象的布尔值永远都是true，会影响布尔值的判断
+
+### 5.3.2 Number
+
+- toFixed()：根据参数返回相应位数的字符串表示的数字
+
+  ```js
+  let a = 1.006;
+  let s = a.toFixed(2); //s=1.01
+  ```
+
+- toExponential()：将一个数字返回字符串，用科学计数法表示。参数表示小数位数
+
+  ```js
+  let a = 100;
+  let s = a.toExponential(1); //s=1.0e+2
+  ```
+
+- toPrecision()：会根据情况返回一个最后合理的结果，参数决定显示的数字位数，为科学计数法还是小数
+
+  ```js
+  let a = 99;
+  let s1 = a.toPrecision(1); //s1=1e+2，因为99没法表示成一个数字，所以变成100再转成科学计数法
+  let s2 = a.toPrecision(2); //s2=99
+  let s3 = a.toPrecision(3); //s3=99.0
+  ```
+
+- isInteger()：判断一个数是不是整数
+
+### 5.3.3 String
+
+1. Js字符
+
+   - charAt()：返回给定索引的字符
+
+   - charCodeAt()：返回给定索引的字符编码
+
+   - fromCharCode()：根据给定字符编码，返回字符串
+
+     ```js
+     let s = String.fromCharCode(97,98,99) //abc
+     ```
+
+   - codePointAt()：如果是多个编码组成的字符，使用这个就很合适，作用和charCodeAt()作用一样
+   - fromCodePoint()：根据给定字符编码，返回字符串，可以写入码点。码点就是一个字符对应的编码。
+
+2. normalize()方法
+
+   让字符串规范化
+
+3. 字符串操作方法
+
+   - concat()：拼接字符串
+
+   - slice()、substring()、substr()区别:
+
+     - 当只有一个正参数时，三个一样
+
+       ```js
+       let s = "hello world";
+       let s1 = s.slice(3) //lo world
+       let s1 = s.substring(3) //lo world
+       let s1 = s.substr(3) //lo world
+       ```
+
+     - 当第一个参数为正参数，第二个参数也为正参数时。slice和substring一样，都是返回第一个参数到第二个参数前之间的子串。而substr返回从第一个参数开始的字符串，第二个参数为该子串的字符个数
+
+       ```js
+       let s = "hello world";
+       let s1 = s.slice(3, 7) //lo w
+       let s1 = s.substring(3, 7) //lo w
+       let s1 = s.substr(3, 7) //lo worl
+       ```
+
+     - 当第一个参数为负数时，slice会从倒数第n个开始，substring将负数默认变为0，substr会从倒数第n个开始
+
+       ```js
+       let s = "hello world";
+       let s1 = s.slice(-3) //rld
+       let s1 = s.substring(-3) //hello world
+       let s1 = s.substr(-3) //rld
+       ```
+
+     - 当第二个参数为负数时，slice依旧，substring还是将负数变为0，substr的第一个参数为负数会从倒数第n个开始，第二个参数为负数默认也变为0
+
+       ```js
+       let s = "hello world";
+       let s1 = s.slice(3, -4) //lo w
+       let s1 = s.substring(3, -4) //hel
+       let s1 = s.substr(3, -4) //""，因为第二个参数为0，所以返回空串
+       ```
+
+4. 字符串位置方法
+
+   - indexof(substr, start):
+
+     从start位置到字符串末尾查找子串，如果不写第二个参数，就是从字符串头部开始查找，返回子串位置
+
+   - lastIndexOf(substr, start):
+
+     从start位置到字符串开头查找子串，如果不写第二个参数，就是从字符串末尾开始查找，返回子串位置
+
+5. 字符串包含方法
+
+   - startsWith(substr, start):
+
+     从start位置开始匹配子串，如果包含返回true，如果不加第二个参数默认为从字符串头部开始
+
+   - endsWith(substr, end):
+
+     假设字符串就到end结束，判断子串是否和默认部分相同，如果包含返回true，如果不加第二个参数默认从字符串末尾开始匹配
+
+   - includes(substr, start):
+
+     从start开始，从整个字符串寻找，不像startsWith和endsWiths只从开始和末尾寻找，找到包含子串返回true
+
+6. trim()方法
+
+   - 有trim()、trimLeft()、trimRight()。分别为将字符串左右空格去除、字符串左边空格去除、字符串右边空格去除
+
+7. repeat(n)方法
+
+   将一个字符串重复n次
+
+8. padStart(n, str)和padEnd(n, str)方法
+
+   将一个字符串填充到n位，如果有第二个参数那么用第二个参数来填充，如果没有就用空格填充。padStart是从开始填充，padEnd是从末尾填充。如果n小于等于源字符串，那么返回源字符串
+
+9. 字符串迭代与解构
+
+   默认暴露了@@iterator，所以可以迭代。也可以使用[...str]，直接变为字符数组
+
+10. 字符串大小写转换
+
+    - toLowerCase()、toUpperCase()、toLocaleLowerCase()、toLocaleUpperCase()
+
+      前两个是以前就有的，变为小写和变为大写。后面两个是新加的，因为不同地区的大小写转换可能不一样，是地区特定的方法。如果确定不了地区，最好使用后两个
+
+11. 字符串模式匹配方法
+
+    - match()：返回匹配的子串，如果开启g，会找出所有匹配子串
+
+    - search()：返回第一次匹配子串的位置。开启g没用
+
+    - replace()：第二个参数不光可以放字符串，也可以放函数
+
+      ```js
+      function htmlEscape(text) {
+          return text.replace(/[<>&"]/g, function (match, pos, originalText) {
+              switch (match) {
+                  case "<":
+                      return "&lt;";
+                  case ">":
+                      return "&gt;";
+                  case "&":
+                      return "&amp;";
+                  case "\"":
+                      return "&quot;";
+              }
+          })
+      }
+      
+      console.log(htmlEscape("<div class=\"box\">'hello world'</div>"))
+      //&lt;div class=&quot;box&quot;&gt;'hello world'&lt;/div&gt;
+      ```
+
+    - split()：第一个参数为以什么分割，第二个参数为返回数组的最大元素个数
+
+12. localeCompare()方法
+
+    字符串比字符串参数大返回1，相等0，小返回-1
+
+    ```js
+    const stringValue = 'yellow';
+    console.log(stringValue.localeCompare('brick')) //1
+    console.log(stringValue.localeCompare('yellow')) //0
+    console.log(stringValue.localeCompare('zoo')) //-1
+    ```
+
+## 5.4 单例内置对象
+
+### 5.4.1 Global
+
+1. URL编码方法（目前不知道用处）
+2. eval()方法：解释字符串中的内容，执行字符串中的js语句。不会变量提升。在eval里的字符串可以看成在块作用域里，所以使用let和const定义的变量，在外部使用会报错。
+3. Global属性（p130）
+4. window对象：可以看成是Global的代理，因为没有直接访问Global的方式。
+
+### 5.4.2 Math
+
+1. Math对象属性(p132)
+2. min()和max()方法：可以放多个参数进行比较
+3. 舍入方法
+   - Math.floor()：向下取整
+   - Math.ceil()：向上取整
+   - Math.round()：四舍五入
+   - Math.fround()：返回数值最接近单精度的浮点数表示
+4. random()方法：随机产生0~1的小数，但是可以到0到不了1。如果为了加密和更大的不确定性使用window.crypto.getRandomValues()
+5. 其他方法（p134）
