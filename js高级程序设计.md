@@ -180,7 +180,7 @@ console.log(age) //14
 //var支持重复定义
 ```
 
-### 3.1.2 let
+### 3.3.2 let
 
 1. let不支持重复声明
 
@@ -214,7 +214,7 @@ console.log(window.age) //undefined
 
 ​	let不支持条件声明，因为let在块级作用域里声明以后，外部获取不到。
 
-### 3.1.3 const
+### 3.3.3 const
 
 ​	与let很相似，但是必须初始化，并且不能对其修改。let与const也不能声明相同变量
 
@@ -351,6 +351,7 @@ console.log(typeof age); //undefined
      可以将除了null、undefined的数据类型转为字符串等价物
 
      ```js
+     //下面是简写的错误写法，正常应该把值存给一个变量然后使用toString
      true.toString(); //"true"
      10.toString(); //"10"
      10.toString(16); //"a"
@@ -1178,3 +1179,185 @@ let obj = new Object("heihei"); //obj结果为String{"heihei"}
    - Math.fround()：返回数值最接近单精度的浮点数表示
 4. random()方法：随机产生0~1的小数，但是可以到0到不了1。如果为了加密和更大的不确定性使用window.crypto.getRandomValues()
 5. 其他方法（p134）
+
+# 六、集合引用类型
+
+## 6.1 Object
+
+两种定义方法
+
+```js
+let obj1 = new Object();
+let obj2 = {};
+```
+
+存取有两种方式，使用点语法的话不可以使用变量，使用中括号可以
+
+```js
+let obj = {
+    name:'zs',
+    "first name":"heihei"
+};
+let propertyName = "name";
+console.log(obj[propertyName]); //'zs'
+console.log(obj.propertyName); //undefined
+console.log(obj["first name"]) //"heihei"
+console.log(obj.first name) //error
+```
+
+## 6.2 Array
+
+### 6.2.1 创建数组
+
+两种定义方法，如果new Array的参数为数字n，那么创建一个含有n个元素的数组，如果为其他数据类型直接创建含有其他数字类型的数组
+
+```js
+let arr1 = new Array(3); //创建了一个length为3的数组
+let arr2 = new Array("heihei", "haha"); //["heihei", "haha"]
+let arr3 = [];
+```
+
+还有两种静态方法from()和of()。from可以把伪数组转换为真实数组，of可以把参数转为数组。
+
+from()可以接收三个参数，后两个参数是可选的。第一个参数是将伪数组或者数组进行浅复制产生一个新数组，第二个参数是一个函数，这个函数相当于将新数组使用了map方法，第三个参数是指定函数中的this的值（如果第二个参数使用箭头函数，第三个参数失效）
+
+```js
+let arr = [1,2,3,4];
+let arr1 = Array.from(arr, function(item){ return item**this.exponent }, { exponent:2 })
+console.log(arr1) //[1,4,9,16]
+```
+
+```js
+let arr = Array.of(1,2,3,4);
+console.log(arr); //[1,2,3,4]
+let arr1 = Array.of(undefined);
+console.log(arr1); //[undefined]
+```
+
+### 6.2.2 数组空位
+
+在es6以后，数组空位的值为undefined，但是es6以前的方法是直接忽视空位。所以为了防止不一致产生的后果，最好将空位显式地用undefined来填充
+
+```js
+let a = [,,,,]; //数组空位，数组长度为5
+```
+
+### 6.2.3 数组索引
+
+length方法不光是只读也可以写
+
+### 6.2.4 检测数组
+
+使用instanceof和Array.isArray()来判断是不是数组
+
+### 6.2.5 迭代器方法
+
+- Array.keys()：返回数组索引的迭代器，可以使用Array.from()转为数组
+- Array.valus()：返回数组元素的迭代器
+- Array.entries()：返回数组索引/值的迭代器
+
+### 6.2.6 复制和填充方法
+
+- 填充方法：Array.fill()。有三个参数，第一个参数为填充的值，第二个参数为开始填充的位置，第三个参数为结束填充位置的后一个值。其中后两个是可选值，如果都不写那就是全部填充。如果是写了第二个参数，不写第三个参数，那就是从开始位置到结尾。二三参数如果超出范围忽略，如果倒序忽略
+
+  ```js
+  let arr = [0,0,0,0,0];
+  arr.fill(1,1,3);
+  console.log(arr); //[0,1,1,0,0]
+  let arr1 = [0,0,0,0,0];
+  arr1.fill(1,3,1);
+  console.log(arr1); //[0,0,0,0,0]
+  ```
+
+- 复制方法：Array.copyWithin()。有三个参数，第一个参数为插入值的位置，第二个参数为开始抽取的位值，第三个参数为结束抽取的位值。遵循规则和fill一样
+
+  ```js
+  let arr = [1,2,3,4,5];
+  arr.copyWithin(0,1,3);
+  console.log(arr); //[2,3,3,4,5]
+  let arr1 = [1,2,3,4,5];
+  arr1.fill(0,3,1);
+  console.log(arr1); //[1,2,3,4,5]
+  ```
+
+### 6.2.7 转换方法
+
+- join()方法不填加参数或参数为undefined，默认用逗号拼成字符串
+
+### 6.2.8 栈方法
+
+- push方法可以传任意数量的参数，返回数组当前的长度。
+
+- pop方法删除最后一个元素，返回最后一个元素
+
+### 6.2.9 队列方法
+
+- shift()、push()
+- unshift()、pop()
+
+### 6.2.10 排序方法
+
+- reverse()：翻转数组
+
+- sort()：如果里面不写函数，会默认把数组里的数字转为字符串来进行大小比较
+
+  ```js
+  let arr = [1,2,3,10];
+  arr.sort(); //[1, 10, 2, 3]
+  ```
+
+### 6.2.11 操作方法
+
+- concat()
+- slice()
+- splice()：有三个参数，第一个参数为我要开始处理的位置，第二个参数为删除元素的个数，第三个参数为插入的元素，（第三个参数可以为多个参数）
+
+### 6.2.12 搜索和位置方法
+
+1. 严格相等
+
+   - indexOf()、lastIndexOf()、includes()。这三个方法匹配值必须是完全相等。
+
+2. 断言函数
+
+   - find()、findIndex()。参数为断言函数，该函数有三个参数分别为item、index、array。匹配了以后，就不会再往下执行了
+
+     ```js
+     const people = [
+         {
+             name:"zs",
+             age:18
+         },
+         {
+             name:"ls",
+             age:20
+         },
+     ]
+     let res = people.find((item, index, array)=>{
+         return item.age < 19
+     })
+     let res1 = people.findIndex((item, index, array)=>{
+         return item.age < 19
+     })
+     console.log(res); //{name:"zs",age:18}
+     console.log(res1); //0
+     ```
+
+### 6.2.13迭代方法
+
+-  every()：遍历数组执行传入的函数，如果每次执行都为true，该函数最后返回true
+
+- filter()
+
+- forEach()
+
+- map()
+
+- some()：遍历数组执行传入的函数，只要有一次执行为true，该函数返回true
+
+  以上方法都不会修改原数组
+
+### 6.2.14 归并方法
+
+- reduce：数组从左到右遍历，如果有第二个参数，遍历数组从第一项开始，如果没有从第二项开始
+- reduceRight：数组从右到左遍历，与reduce一致
